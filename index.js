@@ -1,15 +1,10 @@
 const { spawn } = require('child_process')
 const path = require('path')
 
-
-const code = 'var a = {"b": 123}; a'
-const code2 = `this.constructor.constructor('return this.process')();
-process.mainModule.require('child_process').execSync('cat /etc/passwd').toString()`
-
 class VM  {
-  constructor() {
+  constructor(options) {
     this.options = {
-      timeout: 500,
+      timeout: 500 || options.timeout,
       node:    'node',
       executor:  path.join(__dirname, 'execute.js')
     }
@@ -21,11 +16,11 @@ class VM  {
     this.child = spawn(this.options.node, [this.options.executor], {stdio: ['inherit', 'inherit', 'inherit', 'ipc']})
     this.child.send(code)
     this.child.on('message', (chunk) => {
-      console.log('父进程chunk', chunk)
+      // console.log('父进程chunk', chunk)
       this.result = chunk
     })
     this.child.on('exit', () => {
-      console.log('exit')
+      // console.log('exit')
       cb(this.error, this.result)
     })
 
@@ -36,6 +31,7 @@ class VM  {
   }
 }
 
-const a = new VM()
-a.run(code)
+module.exports = VM
+
+
 
